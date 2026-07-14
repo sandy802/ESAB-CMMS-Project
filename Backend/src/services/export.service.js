@@ -3,9 +3,9 @@ const path = require("path");
 
 const exportCsv = () => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, "..", "..", "..", "analytics", "export_csv.py");
-    const pythonExe = path.join(__dirname, "..", "..", "..", "analytics", "venv", "Scripts", "python.exe");const pythonExe = process.platform === "win32"
-  ? path.join(__dirname, "..", "..", "..", "analytics", "venv", "Scripts", "python.exe")
+    const scriptPath = path.join(__dirname, "..", "..", "..", "Analytics", "export_csv.py");
+const pythonExe = process.platform === "win32"
+  ? path.join(__dirname, "..", "..", "..", "Analytics", "venv", "Scripts", "python.exe")
   : "python3";
     const python = spawn(pythonExe, [scriptPath]);
 
