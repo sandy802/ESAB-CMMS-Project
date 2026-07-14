@@ -7,7 +7,11 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: ["https://esab-cmms-project.vercel.app"],
+  origin: [
+    "https://esab-cmms-project.vercel.app",
+    "https://esab-cmms-project-git-main-sandy--20.vercel.app",
+    "https://esab-cmms-project-c9fsszlyy-sandy-20.vercel.app"
+  ],
   credentials: true
 }));
 app.use(express.json());
