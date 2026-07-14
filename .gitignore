@@ -1,0 +1,23 @@
+﻿# Environment secrets — NEVER commit these
+.env
+.env.local
+**/.env
+**/.env.local
+
+# Node
+node_modules/
+**/node_modules/
+dist/
+build/
+npm-debug.log*
+
+# Python (analytics)
+analytics/venv/
+**/__pycache__/
+*.pyc
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
