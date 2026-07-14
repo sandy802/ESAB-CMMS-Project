@@ -7,6 +7,7 @@ const pool = new Pool({
   user: process.env.DB_USERNAME || "postgres",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "cmms_db",
+  ssl: process.env.DB_HOST !== "localhost" ? { rejectUnauthorized: false } : false,
 });
 
 pool.on("connect", () => {
