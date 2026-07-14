@@ -1,12 +1,17 @@
 ﻿const { spawn } = require("child_process");
 const path = require("path");
 
-const getReportsSummary = () => {
+const getReportsSummary = ({ from, to, assetId } = {}) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, "..", "..", "..", "analytics", "report.py");
     const pythonExe = path.join(__dirname, "..", "..", "..", "analytics", "venv", "Scripts", "python.exe");
 
-    const python = spawn(pythonExe, [scriptPath]);
+    const args = [scriptPath];
+    if (from) args.push(`--from=${from}`);
+    if (to) args.push(`--to=${to}`);
+    if (assetId) args.push(`--assetId=${assetId}`);
+
+    const python = spawn(pythonExe, args);
 
     let dataOutput = "";
     let errorOutput = "";

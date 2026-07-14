@@ -2,7 +2,8 @@
 
 const getSummary = async (req, res) => {
   try {
-    const summary = await reportsService.getReportsSummary();
+    const { from, to, assetId } = req.query;
+    const summary = await reportsService.getReportsSummary({ from, to, assetId });
     res.status(200).json(summary);
   } catch (err) {
     console.error("Reports summary error:", err);

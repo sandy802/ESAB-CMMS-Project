@@ -1,4 +1,4 @@
-const pool = require("../config/database");
+﻿const pool = require("../config/database");
 
 // Generate ticket number like TKT-0001
 const generateTicketNumber = async () => {
@@ -45,7 +45,7 @@ const createTicket = async ({ asset_id, location_id, breakdown_type_id, descript
   return getTicketById(result.rows[0].id);
 };
 
-// GET /tickets — with filters + pagination
+// GET /tickets â€” with filters + pagination
 const getTickets = async ({ status, asset_id, breakdown_type_id, from, to, page = 1, limit = 20, user_id, role }) => {
   const conditions = [];
   const values = [];
@@ -125,7 +125,7 @@ const getTickets = async ({ status, asset_id, breakdown_type_id, from, to, page 
   };
 };
 
-// GET /tickets/:id — single ticket with all details
+// GET /tickets/:id â€” single ticket with all details
 const getTicketById = async (id) => {
   const result = await pool.query(
     `SELECT
@@ -156,7 +156,7 @@ const getTicketById = async (id) => {
   return result.rows[0] || null;
 };
 
-// PATCH /tickets/:id/pickup — set IN_PROGRESS
+// PATCH /tickets/:id/pickup â€” set IN_PROGRESS
 const pickupTicket = async (ticket_id, user_id) => {
   const ticket = await pool.query("SELECT * FROM tickets WHERE id = $1", [ticket_id]);
 
@@ -178,7 +178,7 @@ const pickupTicket = async (ticket_id, user_id) => {
   return getTicketById(ticket_id);
 };
 
-// PATCH /tickets/:id/close — set CLOSED, calculate MTTR, update MTBF gap
+// PATCH /tickets/:id/close â€” set CLOSED, calculate MTTR, update MTBF gap
 const closeTicket = async (ticket_id, user_id, { root_cause_id, mttr_reason_id, resolution_notes, parts_replaced }) => {
   if (!root_cause_id)    throw { status: 400, message: "root_cause_id is required" };
   if (!mttr_reason_id)   throw { status: 400, message: "mttr_reason_id is required" };
@@ -226,7 +226,7 @@ const closeTicket = async (ticket_id, user_id, { root_cause_id, mttr_reason_id, 
   return getTicketById(ticket_id);
 };
 
-// MTBF helper — for a given asset, calculate average time between failures
+// MTBF helper â€” for a given asset, calculate average time between failures
 // MTBF = average of (next ticket reported_at - previous ticket closed_at) across all consecutive pairs
 const getMTBFByAsset = async (asset_id) => {
   // Fetch all closed tickets for this asset ordered by close time
@@ -251,7 +251,7 @@ const getMTBFByAsset = async (asset_id) => {
     const currReportedAt = new Date(tickets[i].reported_at);
     const gapMinutes = Math.round((currReportedAt - prevClosedAt) / (1000 * 60));
 
-    // Only count positive gaps — if a ticket was opened before previous closed, skip
+    // Only count positive gaps â€” if a ticket was opened before previous closed, skip
     if (gapMinutes > 0) gaps.push(gapMinutes);
   }
 
@@ -261,29 +261,34 @@ const getMTBFByAsset = async (asset_id) => {
   return avgMtbfMinutes;
 };
 
-// GET MTBF across all assets — used by dashboard
-const getMTBFAllAssets = async ({ from, to } = {}) => {
+// GET MTBF across all assets â€” used by dashboard
+const getMTBFAllAssets = async ({ from, to, assetId } = {}) => {
   let conditions = ["t.status = 'CLOSED'", "t.closed_at IS NOT NULL"];
   const values = [];
   let idx = 1;
 
-  if (from) { conditions.push(`t.reported_at >= $${idx++}`); values.push(new Date(from)); }
+  if (from) { conditions.push(`t.reported_at >= $${idx++}::timestamp`); values.push(new Date(from)); }
   if (to)   {
     const toDate = new Date(to);
     toDate.setHours(23, 59, 59, 999);
-    conditions.push(`t.reported_at <= $${idx++}`);
+    conditions.push(`t.reported_at <= $${idx++}::timestamp`);
     values.push(toDate);
   }
+  if (assetId) { conditions.push(`t.asset_id = $${idx++}`); values.push(assetId); }
 
   const where = `WHERE ${conditions.join(" AND ")}`;
 
+  console.log("MTBF DEBUG where:", where);
+  console.log("MTBF DEBUG values:", values);
+
   const result = await pool.query(
     `SELECT asset_id, reported_at, closed_at
-     FROM tickets t
-     ${where}
-     ORDER BY asset_id, closed_at ASC`,
+      FROM tickets t
+      ${where}
+      ORDER BY asset_id, closed_at ASC`,
     values
   );
+
 
   // Group by asset
   const byAsset = {};
@@ -305,3 +310,5 @@ const getMTBFAllAssets = async ({ from, to } = {}) => {
 };
 
 module.exports = { createTicket, getTickets, getTicketById, pickupTicket, closeTicket, getMTBFByAsset, getMTBFAllAssets };
+
+
