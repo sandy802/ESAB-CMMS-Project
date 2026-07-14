@@ -4,7 +4,9 @@ const path = require("path");
 const getReportsSummary = ({ from, to, assetId } = {}) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, "..", "..", "..", "analytics", "report.py");
-    const pythonExe = path.join(__dirname, "..", "..", "..", "analytics", "venv", "Scripts", "python.exe");
+    const pythonExe = process.platform === "win32"
+  ? path.join(__dirname, "..", "..", "..", "analytics", "venv", "Scripts", "python.exe")
+  : "python3";
 
     const args = [scriptPath];
     if (from) args.push(`--from=${from}`);
