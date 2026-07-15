@@ -1,6 +1,3 @@
-// LoginPage.jsx
-// Dispatches loginThunk from authSlice. No AuthContext.
-
 import { useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,13 +13,13 @@ import {
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { useState } from 'react';
-
+ 
 const ROLE_REDIRECT = {
   admin:       '/dashboard',
   maintenance: '/tickets',
   operator:    '/tickets',
 };
-
+ 
 const LoginPage = () => {
   const dispatch      = useDispatch();
   const navigate      = useNavigate();
@@ -31,49 +28,55 @@ const LoginPage = () => {
   const user          = useSelector(selectUser);
   const loading       = useSelector(selectAuthLoading);
   const apiError      = useSelector(selectAuthError);
-
+ 
   const [form, setForm]     = useState({ username: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({});
-
+ 
   // Clear any stale Redux error when component mounts
   useEffect(() => {
     dispatch(clearError());
   }, [dispatch]);
-
+ 
   if (initializing) return null;
-
+ 
   // Already authenticated → skip login screen
   if (isAuthenticated && user) {
     return <Navigate to={ROLE_REDIRECT[user.role] || '/tickets'} replace />;
   }
-
+ 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
     if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }));
     if (apiError) dispatch(clearError());
   };
-
+ 
+  const fillDemoCredentials = () => {
+    setForm({ username: 'demo', password: 'Demo@123' });
+    setFieldErrors({});
+    if (apiError) dispatch(clearError());
+  };
+ 
   const validate = () => {
     const e = {};
     if (!form.username.trim()) e.username = 'Username is required.';
     if (!form.password)        e.password = 'Password is required.';
     return e;
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validate();
     if (Object.keys(errors).length) { setFieldErrors(errors); return; }
-
+ 
     const result = await dispatch(loginThunk({ username: form.username, password: form.password }));
-
+ 
     if (loginThunk.fulfilled.match(result)) {
       const role = result.payload?.role;
       navigate(ROLE_REDIRECT[role] || '/tickets', { replace: true });
     }
     // If rejected, apiError is set in Redux state — renders below automatically
   };
-
+ 
   return (
     <div className="min-h-screen bg-gray-950 flex">
       {/* Left panel — branding */}
@@ -115,7 +118,7 @@ const LoginPage = () => {
           ))}
         </div>
       </div>
-
+ 
       {/* Right panel — form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
@@ -129,12 +132,29 @@ const LoginPage = () => {
             </div>
             <span className="text-xs font-bold uppercase tracking-widest text-gray-400">ESAB CMMS</span>
           </div>
-
+ 
           <div className="mb-8">
             <h1 className="text-2xl font-black uppercase tracking-tight text-gray-100">Sign In</h1>
             <p className="text-sm text-gray-500 mt-1">Enter your credentials to continue.</p>
           </div>
-
+ 
+          {/* Demo access box */}
+          <div className="mb-5 px-4 py-3 bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-500">Demo Access</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Username: <span className="text-gray-300">demo</span> · Password: <span className="text-gray-300">Demo@123</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fillDemoCredentials}
+              className="shrink-0 text-xs font-semibold text-amber-500 border border-amber-500/40 px-3 py-1.5 hover:bg-amber-500/10 transition-colors"
+            >
+              Use Demo
+            </button>
+          </div>
+ 
           {/* API error from Redux */}
           {apiError && (
             <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/30 flex items-center gap-2">
@@ -144,7 +164,7 @@ const LoginPage = () => {
               <span className="text-sm text-red-400">{apiError}</span>
             </div>
           )}
-
+ 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
             <Input
               id="username"
@@ -185,5 +205,5 @@ const LoginPage = () => {
     </div>
   );
 };
-
+ 
 export default LoginPage;
