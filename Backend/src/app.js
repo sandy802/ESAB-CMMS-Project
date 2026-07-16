@@ -10,7 +10,8 @@ app.use(cors({
   origin: [
     "https://esab-cmms-project.vercel.app",
     "https://esab-cmms-project-git-main-sandy--20.vercel.app",
-    "https://esab-cmms-project-c9fsszlyy-sandy-20.vercel.app"
+    "https://esab-cmms-project-c9fsszlyy-sandy-20.vercel.app",
+    "http://localhost:5173"
   ],
   credentials: true
 }));

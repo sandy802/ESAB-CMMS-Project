@@ -15,7 +15,7 @@ A centralized breakdown tracking and machine health monitoring system, built as 
 - Master data CRUD (machines, locations, breakdown types, root causes, MTTR reasons)
 - User management (create / deactivate)
 - Live dashboard KPIs
-- Reports page powered by a Python/pandas analytics script
+- Reports page powered by a Python/pandas Analytics script
 
 ## Local Setup
 
@@ -29,8 +29,8 @@ cd Backend && npm install && npm run seed && npm run seed:master && npm run seed
 ### Frontend
 cd frontend && npm install && npm run dev
 
-### Python analytics
-cd analytics && python -m venv venv && venv\Scripts\activate && pip install pandas psycopg2-binary
+### Python Analytics
+cd Analytics && python -m venv venv && venv\Scripts\activate && pip install pandas psycopg2-binary
 
 ## Test Credentials
 admin / admin123 (admin role)

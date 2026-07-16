@@ -11,8 +11,8 @@ dist/
 build/
 npm-debug.log*
 
-# Python (analytics)
-analytics/venv/
+# Python (Analytics)
+Analytics/venv/
 **/__pycache__/
 *.pyc
 

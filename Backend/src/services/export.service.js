@@ -1,33 +1,16 @@
-﻿const { spawn } = require("child_process");
-const path = require("path");
+﻿const ANALYTICS_URL = process.env.ANALYTICS_URL || "http://127.0.0.1:5001";
 
-const exportCsv = () => {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, "..", "..", "..", "Analytics", "export_csv.py");
-const pythonExe = process.platform === "win32"
-  ? path.join(__dirname, "..", "..", "..", "Analytics", "venv", "Scripts", "python.exe")
-  : "python3";
-    const python = spawn(pythonExe, [scriptPath]);
+const exportCsv = async ({ from, to, assetId } = {}) => {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  if (assetId) params.set("assetId", assetId);
 
-    let dataOutput = "";
-    let errorOutput = "";
+  const url = `${ANALYTICS_URL}/export/csv${params.toString() ? `?${params}` : ""}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Analytics service returned ${response.status}`);
 
-    python.stdout.on("data", (chunk) => {
-      dataOutput += chunk.toString();
-    });
-
-    python.stderr.on("data", (chunk) => {
-      errorOutput += chunk.toString();
-    });
-
-    python.on("close", (code) => {
-      if (code !== 0) {
-        console.error("Python stderr:", errorOutput);
-        return reject(new Error("CSV export failed"));
-      }
-      resolve(dataOutput);
-    });
-  });
+  return response.text();
 };
 
 module.exports = { exportCsv };

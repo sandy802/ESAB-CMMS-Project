@@ -278,8 +278,6 @@ const getMTBFAllAssets = async ({ from, to, assetId } = {}) => {
 
   const where = `WHERE ${conditions.join(" AND ")}`;
 
-  console.log("MTBF DEBUG where:", where);
-  console.log("MTBF DEBUG values:", values);
 
   const result = await pool.query(
     `SELECT asset_id, reported_at, closed_at

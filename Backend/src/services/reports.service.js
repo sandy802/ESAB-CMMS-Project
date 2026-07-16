@@ -1,45 +1,27 @@
-﻿const { spawn } = require("child_process");
-const path = require("path");
+﻿const ANALYTICS_URL = process.env.ANALYTICS_URL || "http://127.0.0.1:5001";
 
-const getReportsSummary = ({ from, to, assetId } = {}) => {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, "..", "..", "..", "Analytics", "report.py");
-    const pythonExe = process.platform === "win32"
-  ? path.join(__dirname, "..", "..", "..", "ASnalytics", "venv", "Scripts", "python.exe")
-  : "python3";
+const cache = new Map();
+const CACHE_TTL_MS = 60 * 1000;
 
-    const args = [scriptPath];
-    if (from) args.push(`--from=${from}`);
-    if (to) args.push(`--to=${to}`);
-    if (assetId) args.push(`--assetId=${assetId}`);
+const getReportsSummary = async ({ from, to, assetId } = {}) => {
+  const cacheKey = JSON.stringify({ from: from || null, to: to || null, assetId: assetId || null });
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
 
-    const python = spawn(pythonExe, args);
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  if (assetId) params.set("assetId", assetId);
 
-    let dataOutput = "";
-    let errorOutput = "";
+  const url = `${ANALYTICS_URL}/summary${params.toString() ? `?${params}` : ""}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Analytics service returned ${response.status}`);
 
-    python.stdout.on("data", (chunk) => {
-      dataOutput += chunk.toString();
-    });
-
-    python.stderr.on("data", (chunk) => {
-      errorOutput += chunk.toString();
-    });
-
-    python.on("close", (code) => {
-      if (code !== 0) {
-        console.error("Python stderr:", errorOutput);
-        return reject(new Error("Python script failed"));
-      }
-      try {
-        const result = JSON.parse(dataOutput.trim());
-        resolve(result);
-      } catch (err) {
-        console.error("Failed to parse Python output:", dataOutput);
-        reject(new Error("Invalid JSON from Python script"));
-      }
-    });
-  });
+  const result = await response.json();
+  cache.set(cacheKey, { data: result, timestamp: Date.now() });
+  return result;
 };
 
 module.exports = { getReportsSummary };

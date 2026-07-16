@@ -17,8 +17,7 @@ const getDashboardStats = async ({ from, to, assetId } = {}) => {
   if (assetId) { conditions.push(`asset_id = $${idx++}`); values.push(assetId); }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-  console.log("DEBUG where:", where);
-  console.log("DEBUG values:", values);
+  
 
   const totalResult = await pool.query(
     `SELECT COUNT(*) AS count FROM tickets ${where}`,

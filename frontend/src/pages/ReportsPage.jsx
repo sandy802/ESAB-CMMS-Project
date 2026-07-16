@@ -110,7 +110,7 @@ const ReportsPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <PageHeader title="Reports" subtitle="Maintenance analytics & KPIs" />
+      <PageHeader title="Reports" subtitle="Maintenance Analytics & KPIs" />
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
