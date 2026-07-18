@@ -1,6 +1,6 @@
 // App.jsx
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -37,17 +37,31 @@ import TicketDetailPage  from "./pages/tickets/TicketDetailPage";
 
 // ─── Loaders & Guards ─────────────────────────────────────────────────────────
 
-const AppLoader = () => (
-  <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-8 h-8 bg-amber-500 animate-pulse" />
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-600">
-        Loading…
-      </span>
-    </div>
-  </div>
-);
+const AppLoader = () => {
+  const [slow, setSlow] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-6">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="w-8 h-8 bg-amber-500 animate-pulse" />
+        <span className="text-xs font-bold uppercase tracking-widest text-gray-600">
+          {slow ? "Waking up the server…" : "Loading…"}
+        </span>
+        {slow && (
+          <span className="text-xs text-gray-500 max-w-xs">
+            Our free hosting spins down when idle — this can take up to a
+            minute on the first visit. Thanks for your patience!
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 const ProtectedRoute = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const initializing = useSelector(selectInitializing);
